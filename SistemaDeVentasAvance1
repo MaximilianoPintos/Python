@@ -6,25 +6,25 @@ import sqlite3
 import datetime
 import math
 
-date = datetime.datetime.now()
-#lista temporal  listas
-lista_producto = []
+#---------- Variables Globales ---------------
+date = datetime.datetime.now() # Fecha/Hora
+#Listas
+lista_producto = [] 
 precio_product= []
 cantidad_producto= []
 id_producto = []
-
-#listas de etiquetas
+precio_Unitario = []
 labels_listas= []
 
 class Inicio:
     db_nombre = 'SistemaDeVentas/BaseDeDatos1.db'  # Llamado a la base de datos
 
-    # Ventana Principal
+    # ---------------- Ventana Principal -----------------
     def __init__(self, ventana_principal):
 
         # Ventana Principal
         ventana_principal.title("Sistema De Venta")
-        ventana_principal.minsize(1366,766)
+        ventana_principal.geometry("1500x766")
         ventana_principal.resizable(0, 0)
         ventana_principal.config(background="gray")
         ventana_principal.config(relief="ridge")
@@ -37,7 +37,7 @@ class Inicio:
         self.izquierda.config(bd=10)
         self.izquierda.config(relief="ridge")
         
-        self.derecha = Frame(ventana_principal, width=550,height=768,bg="gray")
+        self.derecha = Frame(ventana_principal, width=665,height=768,bg="gray")
         self.derecha.pack(side = "right")
         self.derecha.config(bd=5)
         self.derecha.config(relief="ridge")
@@ -56,10 +56,13 @@ class Inicio:
         self.tproducto.place(x = 0, y=60)
 
         self.tcantidad= Label(self.derecha, text="Cantidad", font=("arial 18 bold"), bg = "gray", fg="white")
-        self.tcantidad.place(x = 250, y=60)
+        self.tcantidad.place(x = 230, y=60)
 
-        self.tprecio= Label(self.derecha, text="Precio", font=("arial 18 bold"), bg = "gray", fg="white")
-        self.tprecio.place(x = 450, y=60)
+        self.Punidad= Label(self.derecha, text="P.Unidad", font=("arial 18 bold"), bg = "gray", fg="white")
+        self.Punidad.place(x = 400, y=60)
+
+        self.Ptotal = Label(self.derecha, text="Total", font = ("arial 18 bold"), bg= "gray", fg="white")
+        self.Ptotal.place(x = 580 , y=60)
 
         #Ingresos ventana principal
         self.ingresar_id = Label(self.izquierda, text="Ingrese ID: ", font=("arial 20 bold"), bg="white")
@@ -87,7 +90,7 @@ class Inicio:
         # total etiqueta
         self.tota1 = Label(self.derecha, text="", font=("arial 20 bold"),bg="gray", fg="white")
         self.tota1.place(x=0,y = 600)
-
+    #  ---------------- Ventana Principal -----------------
     def add_vta(self,*args,**kwargs):
         try:    
             self.cantidad_valor = int(self.cantidad_a.get())
@@ -99,6 +102,7 @@ class Inicio:
                 precio_product.append(self.precio_final)
                 cantidad_producto.append(self.cantidad_valor)
                 id_producto.append(self.obtener_id)
+                precio_Unitario.append(self.obtener_precio)
 
                 self.contador = 0
                 self.x_index = 0
@@ -109,13 +113,20 @@ class Inicio:
                     self.tempnombre.place(x=0,y=self.y_index)
                     labels_listas.append(self.tempnombre)
 
-                    self.tempcantidad = Label(self.derecha,text=str(cantidad_producto[self.contador]), font=("arial 18 bold"),bg="gray", fg="white")
-                    self.tempcantidad.place(x=300,y=self.y_index)
+                    self.editcantidad= text=str(cantidad_producto[self.contador])
+                    self.tempcantidad = Entry(self.derecha, width=5,font=("arial 18 bold"),bg="gray", fg="white", justify=CENTER)
+                    self.tempcantidad.insert(0, self.editcantidad)
+                    self.tempcantidad.focus()
+                    self.tempcantidad.place(x=250,y=self.y_index)
                     labels_listas.append(self.tempcantidad)
 
-                    self.tempprecio = Label(self.derecha,text=str(precio_product[self.contador]), font=("arial 18 bold"),bg="gray", fg="white")
-                    self.tempprecio.place(x=450,y=self.y_index)
-                    labels_listas.append(self.tempprecio)
+                    self.tempPUnit = Label(self.derecha,text=str(precio_Unitario[self.contador]), font=("arial 18 bold"), bg="gray", fg="white")
+                    self.tempPUnit.place(x=400, y = self.y_index)
+                    labels_listas.append(self.tempPUnit)
+
+                    self.tempTotal = Label(self.derecha,text=str(precio_product[self.contador]), font=("arial 18 bold"),bg="gray", fg="white")
+                    self.tempTotal.place(x=580,y=self.y_index)
+                    labels_listas.append(self.tempTotal)
 
                     self.y_index += 40
                     self.contador += 1
@@ -138,7 +149,7 @@ class Inicio:
         except:
             
             messagebox.showinfo("Cuidado", "Debe Ingresar La Cantidad Deseada")
-            
+    #  ---------------- Ventana Principal -----------------        
     def vuelto_ajax(self,*args,**kwargs):
         self.cantidad_dada = float(self.paga_con1.get())
         self.nuestro_total = float(sum(precio_product))
@@ -151,7 +162,7 @@ class Inicio:
 
         self.vuelto1 = Label(self.derecha, text ="Paga Con:   $" + str (self.cantidad_dada), font=("arial 18 bold"), fg="white", bg="gray")
         self.vuelto1.place(x=0, y = 650)
-
+    #  ---------------- Ventana Principal -----------------
     def generar_factura_ajax(self,*args,**kwargs):
         # Crear factura de venta unica
         self.x= 0
@@ -185,7 +196,7 @@ class Inicio:
         self.descuento_a.delete(0, END)
         self.ingresar_id.focus() 
         messagebox.showinfo("Perfecto", "Venta realizada con exito")
-
+    #  ---------------- Ventana Principal -----------------
     def limpiar_venta_ajax(self,*args,**kwargs):
         #Funcion para limpiar la venta por algun error de tipeo o algo por el estilo.
         for a in labels_listas:
@@ -199,7 +210,7 @@ class Inicio:
         self.paga_con1.delete(0, END) 
         self.descuento_a.delete(0, END)
         self.ingresar_id.focus() 
-
+    #  ---------------- Ventana Principal -----------------
     def ajax(self, *args, **kwargs):
 
         self.obtener_id= self.ingresar_id.get()
@@ -258,7 +269,7 @@ class Inicio:
             self.limpieza.place(x=0, y=650) 
         else:
             messagebox.showerror("Error", "Este producto no existe en la base de datos.")
-
+    #  ---------------- Ventana Principal -----------------
     def listado_productos(self):
 
         ventana_buscar = Tk()
@@ -278,8 +289,51 @@ class Inicio:
         self.obtener_producto()
 
         ventana_buscar.mainloop()
+    #  ---------------- Ventana Principal - Registrar Vendedor (menu) -----------------
+    def registrar_vendedor(self,*args,**kwargs):
+        pass
+    #  ---------------- Ventana Principal - login Vendedor (menu) -----------------
+    def login_vendedor(self,*args,**kwargs):
+        pass    
+    #  ---------------- Ventana Principal (Menu)-----------------
+    def crear_menu(self):
+        # Creacion del Menu , menu principal
 
-    # Ventana Agregar/Quitar Producto
+        # Menu Desplegable Superior
+        menuSuperior = Menu(ventana_principal)
+        ventana_principal.config(menu=menuSuperior)
+        # Menu desplegable (Archivo)
+        menuInicio = Menu(menuSuperior, tearoff=0)
+        menuInicio.add_command(label="Cliente")
+        menuInicio.add_command(label="Vendedor")
+        menuInicio.add_separator()
+        menuInicio.add_command(label="Salir", command=self.salir)
+        # Menu desplegable (Editar)
+        menuAcciones = Menu(menuSuperior, tearoff=0)
+        menuAcciones.add_command(label="Agregar/Quitar Producto", command=self.agregar)
+        menuAcciones.add_command(label="Agregar Archivos", command=self.abrir)    
+        # Menu desplegable (Herramientas)
+        menuAyuda = Menu(menuSuperior, tearoff=0)
+        menuAyuda.add_command(label="Ayuda")
+        menuAyuda.add_separator()
+        menuAyuda.add_command(label="Acerca de..")
+        
+        # Agregando los menu
+        menuSuperior.add_cascade(label="Inicio", menu=menuInicio)
+        menuSuperior.add_cascade(label="Acciones", menu=menuAcciones)
+        menuSuperior.add_cascade(label="Ayuda", menu=menuAyuda)
+    #  ---------------- Funcion Salir (Menu)-----------------
+    def salir(self):
+        # Salir del programa opcion menu
+        respuesta = messagebox.askquestion(
+            "Salida", " ¿Seguro que desea salir? ")
+        if (respuesta == "yes"):
+            ventana_principal.destroy()
+    #  ---------------- Funcion Abrir (Menu)-----------------
+    def abrir(self):
+        # Funcion abrir archivos
+        filedialog.askopenfile(title="Buscador de Archivos")
+    #  ---------------- Ventana Agregar/Quitar Productos-----------------
     def agregar(self):
         # Ventana Producto nuevo
         nuevo_producto = Tk()
@@ -332,49 +386,7 @@ class Inicio:
         self.obtener_producto()
         self.crear_menu()
         nuevo_producto.mainloop()
-    # Funcion Salir (menu)
-
-    def salir(self):
-        # Salir del programa opcion menu
-        respuesta = messagebox.askquestion(
-            "Salida", " ¿Seguro que desea salir? ")
-        if (respuesta == "yes"):
-            ventana_principal.destroy()
-
-    # Funcion abrir archivo (menu)
-
-    def abrir(self):
-        # Funcion abrir archivos
-        filedialog.askopenfile(title="Buscador de Archivos")
-    # Funcion Creacion de Menu
-
-    def crear_menu(self):
-        # Creacion del Menu , menu principal
-
-        # Menu Desplegable Superior
-        menuSuperior = Menu(ventana_principal)
-        ventana_principal.config(menu=menuSuperior)
-        # Menu desplegable (Archivo)
-        menuInicio = Menu(menuSuperior, tearoff=0)
-        menuInicio.add_command(label="Cliente")
-        menuInicio.add_command(label="Vendedor")
-        menuInicio.add_separator()
-        menuInicio.add_command(label="Salir", command=self.salir)
-        # Menu desplegable (Editar)
-        menuAcciones = Menu(menuSuperior, tearoff=0)
-        menuAcciones.add_command(label="Agregar/Quitar Producto", command=self.agregar)
-        menuAcciones.add_command(label="Agregar Archivos", command=self.abrir)    
-        # Menu desplegable (Herramientas)
-        menuAyuda = Menu(menuSuperior, tearoff=0)
-        menuAyuda.add_command(label="Ayuda")
-        menuAyuda.add_separator()
-        menuAyuda.add_command(label="Acerca de..")
-        
-        # Agregando los menu
-        menuSuperior.add_cascade(label="Inicio", menu=menuInicio)
-        menuSuperior.add_cascade(label="Acciones", menu=menuAcciones)
-        menuSuperior.add_cascade(label="Ayuda", menu=menuAyuda)
-
+    #  ---------------- Base De Datos (sqlite)-----------------
     def ejecuta_consulta(self, consulta, parametros=()):
         # Base de datos
         with sqlite3.connect(self.db_nombre) as conn:
@@ -383,8 +395,7 @@ class Inicio:
             conn.commit()
             return result
         raise Exception("No se pudo conectar con la DB")
-    # Obtener productos desde la base de datos
-
+    #  ---------------- Base De Datos (sqlite)-----------------
     def obtener_producto(self):
         # limpiando tabla
         records = self.tree.get_children()
@@ -397,14 +408,13 @@ class Inicio:
         for row in self.filasBD:
             self.tree.insert('', 9999, text=row[0], values=(
                 row[1], row[2], row[3]))
-    # Validacion de campos no vacios
-
+    #  ---------------- Validacion de campos no vacios (General)-----------------
     def validar(self):
         # validacion de campos no vacios
         return len(self.nombre.get()) != 0 and len(self.stock.get()) != 0 and len(self.precio.get()) != 0
-    # Insertar Producto boton ventana agregar / quitar Producto
-
+    #  ---------------- Base De Datos (Ventana Agregar/QuitarProductos)-----------------
     def insertar_producto(self):
+        # Insertar Producto boton ventana agregar / quitar Producto
         if self.validar():
             consult = 'INSERT INTO Productos VALUES(NULL, ?, ?, ?)'
             parametros = (self.nombre.get(),
@@ -418,9 +428,9 @@ class Inicio:
         else:
             self.mensaje['text'] = 'Nombre , stock y Precio son requeridos'
         self.obtener_producto()
-    # Eliminar producto de base de datos, ventana Agregar/Quitar Producto
-
+    #  ---------------- Base De Datos (Ventana Agregar/QuitarProductos)-----------------
     def eliminar_producto(self):
+        # Eliminar producto de base de datos
         self.mensaje["text"] = ''
         if self.tree.item(self.tree.selection())["text"] == "":
             self.mensaje["text"] = "Por favor, seleccione un elemento"
@@ -432,9 +442,9 @@ class Inicio:
         self.mensaje["text"] = "El elemento {} fue eliminado correctamente".format(
             nombre)
         self.obtener_producto()
-    # Funcion editar producto de base de datos ventana Agregar/Quitar Producto
-
+    #  ---------------- Base De Datos (Ventana Agregar/QuitarProductos)-----------------
     def editar_producto(self):
+        # Funcion editar producto de base de datos
         self.mensaje["text"] = ''
         if self.tree.item(self.tree.selection())["text"] == "":
             self.mensaje["text"] = "Por favor, seleccione un elemento"
@@ -485,8 +495,7 @@ class Inicio:
         Button(self.ventana_editar, text="Actualizar", cursor="hand2",
                command=lambda: self.editando(nuevo_nombre.get(), nuevo_stock.get(), nuevo_precio.get(), id)).grid(row=8, column=2, sticky=W, pady=5)
         self.ventana_editar.mainloop()
-    # Ventana Agregar/Quitar Producto
-
+    #  ---------------- Base De Datos (Ventana Agregar/QuitarProductos)-----------------
     def editando(self, nuevo_nombre, nuevo_stock, nuevo_precio, id):
 
         self.mensaje["text"] = ''
