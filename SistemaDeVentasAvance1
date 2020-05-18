@@ -2,19 +2,17 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
-import sqlite3
+import sqlite3 
 import datetime
-import math
 
 #---------- Variables Globales ---------------
 date = datetime.datetime.now() # Fecha/Hora
-#Listas
+#------listas--------
 lista_producto = [] 
 precio_product= []
 cantidad_producto= []
 id_producto = []
 precio_Unitario = []
-labels_listas= []
 
 class Inicio:
     db_nombre = 'SistemaDeVentas/BaseDeDatos1.db'  # Llamado a la base de datos
@@ -24,7 +22,7 @@ class Inicio:
 
         # Ventana Principal
         ventana_principal.title("Sistema De Venta")
-        ventana_principal.geometry("1500x766")
+        ventana_principal.geometry("1600x766")
         ventana_principal.resizable(0, 0)
         ventana_principal.config(background="gray")
         ventana_principal.config(relief="ridge")
@@ -34,10 +32,10 @@ class Inicio:
         #frames - ventana principal
         self.izquierda = Frame(ventana_principal, width=800,height=768,bg="white")
         self.izquierda.pack(side = "left")
-        self.izquierda.config(bd=10)
+        self.izquierda.config(bd=5)
         self.izquierda.config(relief="ridge")
         
-        self.derecha = Frame(ventana_principal, width=665,height=768,bg="gray")
+        self.derecha = Frame(ventana_principal, width=770,height=768,bg="gray")
         self.derecha.pack(side = "right")
         self.derecha.config(bd=5)
         self.derecha.config(relief="ridge")
@@ -49,25 +47,31 @@ class Inicio:
         self.date1 = Label(self.derecha, text="Fecha : " + str(date.strftime('%d/%m/%Y')),font=('arial 12 bold'), bg="gray", fg="white" )
         self.date1.config(bd=5)
         self.date1.config(relief="ridge")
-        self.date1.place(x = 0, y=0)
-        
-        # Tabla          
-        self.tproducto= Label(self.derecha, text="Productos", font=("arial 18 bold"), bg = "gray", fg="white")
-        self.tproducto.place(x = 0, y=60)
+        self.date1.place(x = 0, y=0)      
 
-        self.tcantidad= Label(self.derecha, text="Cantidad", font=("arial 18 bold"), bg = "gray", fg="white")
-        self.tcantidad.place(x = 230, y=60)
+        """self.imagen = PhotoImage(file='SistemaDeVentas/firma.png') 
+        self.fondo = Label(self.derecha, image=self.imagen)
+        self.fondo.place(x=150,y=500)"""
 
-        self.Punidad= Label(self.derecha, text="P.Unidad", font=("arial 18 bold"), bg = "gray", fg="white")
-        self.Punidad.place(x = 400, y=60)
+        # Tabla
+        self.tablax = ttk.Treeview(self.derecha, height=20, columns=('#1', '#2', '#3', '#4'),selectmode = "browse")
+        self.tablax.place(x = 0, y = 60)
 
-        self.Ptotal = Label(self.derecha, text="Total", font = ("arial 18 bold"), bg= "gray", fg="white")
-        self.Ptotal.place(x = 580 , y=60)
+        self.tablax.heading("#0", text="ID", anchor=CENTER )
+        self.tablax.heading("#1", text="NOMBRE", anchor=CENTER)
+        self.tablax.heading("#2", text="CANTIDAD", anchor=CENTER)
+        self.tablax.heading("#3", text="PRECIO UNITARIO", anchor=CENTER)
+        self.tablax.heading("#4", text="TOTAL", anchor=CENTER)    
 
+        self.tablax.column("#0", width = 50 , stretch=False, anchor=CENTER)
+        self.tablax.column("#1", width = 350, stretch=False, anchor=CENTER)
+        self.tablax.column("#2", width = 100, stretch=False, anchor=CENTER)
+        self.tablax.column("#3", width = 130, stretch=False, anchor=CENTER)
+        self.tablax.column("#4", width = 130, stretch=False, anchor=CENTER)
+                                
         #Ingresos ventana principal
         self.ingresar_id = Label(self.izquierda, text="Ingrese ID: ", font=("arial 20 bold"), bg="white")
         self.ingresar_id.place(x=10,y=100)
-
         self.ingresar_id = Entry(self.izquierda, width=20, font=("arial 18 bold"),bg="dark turquoise")
         self.ingresar_id.focus()
         self.ingresar_id.config(justify=CENTER)
@@ -88,66 +92,53 @@ class Inicio:
         self.precio_producto.place(x=0,y=220)
         
         # total etiqueta
-        self.tota1 = Label(self.derecha, text="", font=("arial 20 bold"),bg="gray", fg="white")
-        self.tota1.place(x=0,y = 600)
+        self.tota1 = Label(self.derecha, text="", font=("arial 20 bold"),bg="gray", fg="red")
+        self.tota1.place(x=0,y = 500)
     #  ---------------- Ventana Principal -----------------
     def add_vta(self,*args,**kwargs):
         try:    
             self.cantidad_valor = int(self.cantidad_a.get())
             if self.cantidad_valor > int(self.obtener_stock):
                 self.msj = messagebox.showinfo("Error","La cantidad deseada supera el stock disponible.")
+
             else:
-                self.precio_final = (float(self.cantidad_valor) * float(self.obtener_precio)) - (float(self.descuento_a.get()))
+                self.d_porc = (((float(self.cantidad_valor) * float(self.obtener_precio)) * float(self.descuento_porc.get())) / 100)
+                self.precio_final = ((float(self.cantidad_valor) * float(self.obtener_precio)) - float(self.descuento_pesos.get()) - float(self.d_porc))
                 lista_producto.append(self.obtener_nombre)
                 precio_product.append(self.precio_final)
                 cantidad_producto.append(self.cantidad_valor)
                 id_producto.append(self.obtener_id)
                 precio_Unitario.append(self.obtener_precio)
-
                 self.contador = 0
-                self.x_index = 0
-                self.y_index = 100
 
-                for self.p in lista_producto:
-                    self.tempnombre = Label(self.derecha,text=str(lista_producto[self.contador]), font=("arial 18 bold"),bg="gray", fg="white")
-                    self.tempnombre.place(x=0,y=self.y_index)
-                    labels_listas.append(self.tempnombre)
+                #Limpiando tabla
+                records = self.tablax.get_children()
+                for element in records:
+                    self.tablax.delete(element)
 
-                    self.editcantidad= text=str(cantidad_producto[self.contador])
-                    self.tempcantidad = Entry(self.derecha, width=5,font=("arial 18 bold"),bg="gray", fg="white", justify=CENTER)
-                    self.tempcantidad.insert(0, self.editcantidad)
-                    self.tempcantidad.focus()
-                    self.tempcantidad.place(x=250,y=self.y_index)
-                    labels_listas.append(self.tempcantidad)
+            for self.p in lista_producto:
 
-                    self.tempPUnit = Label(self.derecha,text=str(precio_Unitario[self.contador]), font=("arial 18 bold"), bg="gray", fg="white")
-                    self.tempPUnit.place(x=400, y = self.y_index)
-                    labels_listas.append(self.tempPUnit)
-
-                    self.tempTotal = Label(self.derecha,text=str(precio_product[self.contador]), font=("arial 18 bold"),bg="gray", fg="white")
-                    self.tempTotal.place(x=580,y=self.y_index)
-                    labels_listas.append(self.tempTotal)
-
-                    self.y_index += 40
-                    self.contador += 1
-
-                    # configuracion total 
-                    self.tota1.configure(text="Total:        $" + str(sum(precio_product)))
-
-                    #Eliminar
-                    self.cantidad1.place_forget()
-                    self.cantidad_a.place_forget()
-                    self.descuento1.place_forget()
-                    self.descuento_a.place_forget()
-                    self.nombre_producto.configure(text="")
-                    self.precio_producto.configure(text="")
-                    self.agregar_venta.destroy()
-                    
-                    # autofocus en ingreso de id
-                    self.ingresar_id.focus()
-                    self.ingresar_id.delete(0, END)
+                self.tablax.insert('',10, text=(str(id_producto[self.contador])), values=(str(lista_producto[self.contador]), str(cantidad_producto[self.contador]), str(precio_Unitario[self.contador]), str(precio_product[self.contador])))
+                self.contador+=1  
+                     
+                # configuracion total 
+                self.tota1.configure(text="Total:         $" + str(sum(precio_product)))
+                #Eliminar
+                self.cantidad1.place_forget()
+                self.cantidad_a.place_forget()
+                self.descuento1.place_forget()
+                self.descuento_porc.place_forget()
+                self.descuento_pesos.place_forget()
+                self.nombre_producto.configure(text="")
+                self.precio_producto.configure(text="")
+                self.desc_pesos.place_forget()
+                self.desc_porc.place_forget()
+                self.agregar_venta.place_forget()
+                # autofocus en ingreso de id
+                self.ingresar_id.focus()
+                self.ingresar_id.delete(0, END) 
+                  
         except:
-            
             messagebox.showinfo("Cuidado", "Debe Ingresar La Cantidad Deseada")
     #  ---------------- Ventana Principal -----------------        
     def vuelto_ajax(self,*args,**kwargs):
@@ -155,61 +146,93 @@ class Inicio:
         self.nuestro_total = float(sum(precio_product))
 
         self.dar = self.cantidad_dada - self.nuestro_total
-
+        
         # Label cambio
-        self.vuelto = Label(self.derecha, text ="Vuelto:        $" + str (self.dar), font=("arial 18 bold"), fg="white", bg="gray")
-        self.vuelto.place(x=0, y= 700)
+        self.vuelto = Label(self.derecha, text ="Vuelto:       $" + str (self.dar), font=("arial 20 bold"), fg="red", bg="gray")
+        self.vuelto.place(x=0, y= 600)
 
-        self.vuelto1 = Label(self.derecha, text ="Paga Con:   $" + str (self.cantidad_dada), font=("arial 18 bold"), fg="white", bg="gray")
-        self.vuelto1.place(x=0, y = 650)
+        self.vuelto1 = Label(self.derecha, text ="Paga Con:  $" + str (self.cantidad_dada), font=("arial 20 bold"), fg="red", bg="gray")
+        self.vuelto1.place(x=0, y = 550)
     #  ---------------- Ventana Principal -----------------
     def generar_factura_ajax(self,*args,**kwargs):
-        # Crear factura de venta unica
-        self.x= 0
-        inicio = " SELECT * FROM Productos WHERE id =? "
-        result= self.ejecuta_consulta(inicio, (id_producto[self.x], ))
-        for i in lista_producto:
-            for r in result:
-                self.stock_antiguo= r[2]
-            self.nuevo_stock = int(self.stock_antiguo) - int(cantidad_producto[self.x])
-                
-            #actualizando stock
-            sql = "UPDATE Productos SET stock=? WHERE id=?"
-            self.ejecuta_consulta(sql, (self.nuevo_stock, id_producto[self.x]))
-                
-            # insertar en BD transaccion
-            sql2 = "INSERT INTO Transacciones (nombre, stock, monto, date) VALUES (?,?,?,?)"
-            self.ejecuta_consulta(sql2, (lista_producto[self.x], cantidad_producto[self.x], precio_product[self.x], date.strftime('%d/%m/%Y  %H:%M:%S')))
-            self.x +=1
+        try:
+            self.test_cant = int(self.cantidad_a.get())
+            if self.test_cant == 0:
+                messagebox.showerror("Cuidado", "No Ingreso Cantidad")
+            else:
+                # Crear factura de venta unica
+                self.cont= 0
+                for i in lista_producto:
+                    #actualizando stock
+                    sql = "UPDATE Productos SET stock=stock-? WHERE id=?"
+                    self.ejecuta_consulta(sql, (cantidad_producto[self.cont], id_producto[self.cont]))
+                    
+                    # insertar en BD transaccion
+                    sql2 = "INSERT INTO Transacciones (nombre, stock, monto, date) VALUES (?,?,?,?)"
+                    self.ejecuta_consulta(sql2, (lista_producto[self.cont], cantidad_producto[self.cont], precio_product[self.cont], date.strftime('%d/%m/%Y  %H:%M:%S')))
+                    self.cont +=1
 
-        for a in labels_listas:
-            a.destroy()    
-                
-        del(lista_producto[:])
-        del(id_producto[:])
-        del(cantidad_producto[:])
-        del(precio_product[:])  
+                #Limpiando tabla
+                records = self.tablax.get_children()
+                for element in records:
+                    self.tablax.delete(element)  
+                        
+                del(lista_producto[:])
+                del(id_producto[:])
+                del(cantidad_producto[:])
+                del(precio_product[:])  
 
-        self.tota1.configure(text="")
-        self.paga_con.configure(text="")
-        self.paga_con1.delete(0, END) 
-        self.descuento_a.delete(0, END)
-        self.ingresar_id.focus() 
-        messagebox.showinfo("Perfecto", "Venta realizada con exito")
+                self.tota1.configure(text="")
+                self.paga_con.configure(text="")
+                self.paga_con1.place_forget() 
+                self.descuento_pesos.delete(0, END)
+                self.pagac_btn.place_forget()
+                self.descuento_porc.delete(0,END)
+                self.desc_porc.place_forget()
+                self.desc_pesos.place_forget()
+                self.cantidad1.place_forget()
+                self.cantidad_a.place_forget()
+                # autofocus en ingreso de id
+                self.ingresar_id.focus()
+                self.ingresar_id.delete(0, END) 
+
+                messagebox.showinfo("Perfecto", "Venta realizada con exito")   
+        except:
+            messagebox.showerror("Cuidado", "No Ingreso Venta")
     #  ---------------- Ventana Principal -----------------
     def limpiar_venta_ajax(self,*args,**kwargs):
         #Funcion para limpiar la venta por algun error de tipeo o algo por el estilo.
-        for a in labels_listas:
-            a.destroy() 
+        #Limpiando tabla
+        records = self.tablax.get_children()
+        for element in records:
+            self.tablax.delete(element)
+        
         del(lista_producto[:])
         del(id_producto[:])
         del(cantidad_producto[:])
         del(precio_product[:])  
 
-        self.tota1.configure(text="")
         self.paga_con1.delete(0, END) 
-        self.descuento_a.delete(0, END)
-        self.ingresar_id.focus() 
+        self.descuento_pesos.delete(0, END)
+        self.cantidad1.place_forget()
+        self.cantidad_a.place_forget()
+        self.descuento_porc.delete(0,END)
+        self.nombre_producto.configure(text="")
+        self.precio_producto.configure(text="")
+        self.cantidad1.place_forget()
+        self.cantidad_a.place_forget()
+        self.descuento1.place_forget()
+        self.descuento_porc.place_forget()
+        self.descuento_pesos.place_forget()
+        self.desc_pesos.place_forget()
+        self.desc_porc.place_forget()
+        self.agregar_venta.place_forget()
+        self.paga_con.place_forget()
+        self.paga_con1.place_forget()
+        self.pagac_btn.place_forget()
+        # autofocus en ingreso de id
+        self.ingresar_id.focus()
+        self.ingresar_id.delete(0, END) 
     #  ---------------- Ventana Principal -----------------
     def ajax(self, *args, **kwargs):
 
@@ -227,53 +250,67 @@ class Inicio:
             self.precio_producto.configure(text="Precio Producto: $" + str(self.obtener_precio))
             # cantidad
             self.cantidad1 = Label(self.izquierda, text="Ingrese Cantidad: ", font=("arial 20 bold"), bg="white")
-            self.cantidad1.place(x=40,y=280)
+            self.cantidad1.place(x=35,y=280)
             
             self.cantidad_a = Entry(self.izquierda, width=20, font=("arial 18 bold"),bg="dark turquoise")
             self.cantidad_a.config(justify=CENTER)        
             self.cantidad_a.focus()
-            self.cantidad_a.place(x=280,y=280)  
+            self.cantidad_a.place(x=350,y=280) 
+            self.cantidad_a.insert(END, 0)             
 
             # descuento
-            self.descuento1 = Label(self.izquierda, text="Ingrese Descuento: ", font=("arial 20 bold"), bg="white")
-            self.descuento1.place(x=18,y=350)
+            self.descuento1 = Label(self.izquierda, text="    Descuento: ", font=("arial 20 bold"), bg="white")
+            self.descuento1.place(x=0,y=350)
             
-            self.descuento_a = Entry(self.izquierda, width=20, font=("arial 18 bold"),bg="dark turquoise")
-            self.descuento_a.config(justify=CENTER)        
-            self.descuento_a.place(x=280,y=350) 
-            self.descuento_a.insert(END, 0)     
+            self.desc_pesos = Label(self.izquierda, text="( $ )", font=("arial 20"), bg="white")
+            self.desc_pesos.place(x=220,y=345)
 
+            self.descuento_pesos = Entry(self.izquierda, width=10, font=("arial 18 bold"),bg="dark turquoise")
+            self.descuento_pesos.config(justify=CENTER)        
+            self.descuento_pesos.place(x=300,y=350) 
+            self.descuento_pesos.insert(END, 0)    
+
+            self.desc_porc = Label(self.izquierda, text="( % )", font=("arial 20 "), bg="white")
+            self.desc_porc.place(x=450,y=345)
+
+            self.descuento_porc = Entry(self.izquierda, width=10, font=("arial 18 bold"),bg="dark turquoise")
+            self.descuento_porc.config(justify=CENTER)        
+            self.descuento_porc.place(x=530,y=350) 
+            self.descuento_porc.insert(END, 0)  
 
             # Agregar al carrito
             self.agregar_venta = Button(self.izquierda, text="Agregar Venta", font=("arial 10 bold") ,cursor="hand2",width=20, height=2,bg="orange", command=self.add_vta)
             self.agregar_venta.config(bd=5)
-            self.agregar_venta.place(x=320,y=400)
+            self.agregar_venta.place(x=390,y=400)
 
             # factura y cambio
             self.paga_con = Label(self.izquierda, text="Paga Con: ", font=("arial 18 bold"), bg="white")
             self.paga_con.place(x=150, y= 470)
 
-            self.paga_con1 = Entry(self.izquierda, width=20, font=("arial 18 bold"), bg="dark turquoise")
-            self.paga_con1.place(x=280, y=470)
+            self.paga_con1 = Entry(self.izquierda, width=20, font=("arial 18 bold"), bg="dark turquoise", justify= CENTER)
+            self.paga_con1.place(x=350, y=470)
                     
             self.pagac_btn = Button(self.izquierda, text=("Calcular Vuelto"),font=("arial 10 bold"),cursor="hand2",width=20, height= 2, bg= "orange", command=self.vuelto_ajax )
             self.pagac_btn.config(bd=5)
-            self.pagac_btn.place(x=320, y=510)   
+            self.pagac_btn.place(x=390, y=510)   
 
             #generar venta
-            self.genera_venta = Button(self.izquierda, text="Generar Venta", font=("arial 18"),cursor="hand2",width=55, height=2, bg="red",fg="white", command= self.generar_factura_ajax)
-            self.genera_venta.place(x=0, y=570) 
+            self.genera_venta = Button(self.derecha, text="Generar Venta", font=("arial 18"),cursor="hand2",width=53, height=2, bg="red",fg="white", command= self.generar_factura_ajax)
+            self.genera_venta.place(x=2, y=645) 
+            self.genera_venta.config(relief="groove")
+            self.genera_venta.config(bd=5)
 
             #Limpiar Venta
             self.limpieza = Button(self.izquierda, text="Limpiar Venta", font=("arial 18"),cursor="hand2",width=55, height=2, bg="orange",fg="black", command= self.limpiar_venta_ajax)
-            self.limpieza.place(x=0, y=650) 
+            self.limpieza.place(x=2, y=645)
+            self.limpieza.config(relief="groove") 
+            self.limpieza.config(bd=5)
         else:
             messagebox.showerror("Error", "Este producto no existe en la base de datos.")
     #  ---------------- Ventana Principal -----------------
     def listado_productos(self):
 
-        ventana_buscar = Tk()
-        ventana_buscar.title("Buscador de Productos")
+        ventana_buscar = Toplevel()
         ventana_buscar.config(background="gray")
         ventana_buscar.resizable(0, 0)
         ventana_buscar.config(relief="groove")
@@ -305,7 +342,7 @@ class Inicio:
         # Menu desplegable (Archivo)
         menuInicio = Menu(menuSuperior, tearoff=0)
         menuInicio.add_command(label="Cliente")
-        menuInicio.add_command(label="Vendedor")
+        menuInicio.add_command(label="Vendedor", command=self.ventana_vendedores)
         menuInicio.add_separator()
         menuInicio.add_command(label="Salir", command=self.salir)
         # Menu desplegable (Editar)
@@ -333,11 +370,17 @@ class Inicio:
     def abrir(self):
         # Funcion abrir archivos
         filedialog.askopenfile(title="Buscador de Archivos")
+    #  ---------------- Ventana Login/Register - vendedores (menu) -----------------
+    def ventana_vendedores(self):
+        ventana_vendedor = Toplevel()
+        ventana_vendedor.geometry("500x500")
+        ventana_vendedor.resizable(0,0)
+        ventana_vendedor.config(bg="gray")
+        ventana_vendedor.mainloop()
     #  ---------------- Ventana Agregar/Quitar Productos-----------------
     def agregar(self):
         # Ventana Producto nuevo
-        nuevo_producto = Tk()
-        nuevo_producto.title("Agregar Producto")
+        nuevo_producto = Toplevel()
         nuevo_producto.config(background="gray")
         nuevo_producto.resizable(0,0)
         # Frame 1
